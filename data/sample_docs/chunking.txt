@@ -1,0 +1,1 @@
+Chunking splits long documents into smaller passages before embedding. Overlapping chunks preserve context across boundaries. Chunk size is a trade-off: small chunks are precise, large chunks carry more context for the language model.

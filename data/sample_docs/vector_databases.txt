@@ -1,0 +1,1 @@
+Vector databases store embeddings and support approximate nearest neighbour search. pgvector adds vector storage and similarity search to PostgreSQL, so embeddings can live next to relational data and be queried with SQL.

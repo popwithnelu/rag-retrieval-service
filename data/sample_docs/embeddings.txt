@@ -1,0 +1,1 @@
+Embeddings are dense vector representations of text. Similar texts produce vectors that are close together under cosine similarity. Embedding models map words, sentences and documents into a shared numeric space for search and clustering.
