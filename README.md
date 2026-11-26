@@ -9,6 +9,9 @@ chunk and embed them, and query them by semantic similarity.
 - **Embeddings** — deterministic local hashing embedder as an offline fallback;
   OpenAI embeddings when `OPENAI_API_KEY` is set (`app/embeddings.py`)
 - **Vector search API** — `/ingest`, `/search`, `/ingest-samples`, `/health`
+- **Document management** — `GET /documents` lists ingested docs with chunk
+  counts, `DELETE /documents/{doc_id}` removes a doc's chunks, and `/search`
+  accepts an optional `min_score` to filter out weak matches
 - **pgvector-ready design** — the store interface maps directly to PostgreSQL +
   pgvector (`embedding <=> query` cosine search; see `app/store.py`)
 - **Recall@k evaluation** — `python -m scripts.evaluate_recall`
@@ -23,7 +26,9 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 curl -X POST localhost:8000/ingest-samples
 curl -X POST localhost:8000/search -H 'Content-Type: application/json' \
-  -d '{"query": "storing vectors in postgres", "k": 3}'
+  -d '{"query": "storing vectors in postgres", "k": 3, "min_score": 0.1}'
+curl localhost:8000/documents
+curl -X DELETE localhost:8000/documents/my-doc
 python -m scripts.evaluate_recall
 ```
 
