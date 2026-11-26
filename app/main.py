@@ -19,6 +19,7 @@ class IngestRequest(BaseModel):
 class SearchRequest(BaseModel):
     query: str
     k: int = 5
+    min_score: float = 0.0
 
 
 @app.get("/health")
@@ -34,7 +35,18 @@ def ingest(req: IngestRequest):
 
 @app.post("/search")
 def search(req: SearchRequest):
-    return {"results": store.search(req.query, req.k)}
+    return {"results": store.search(req.query, req.k, req.min_score)}
+
+
+@app.get("/documents")
+def list_documents():
+    return {"documents": store.list_documents()}
+
+
+@app.delete("/documents/{doc_id}")
+def delete_document(doc_id: str):
+    removed = store.delete(doc_id)
+    return {"doc_id": doc_id, "chunks_removed": removed}
 
 
 @app.post("/ingest-samples")
