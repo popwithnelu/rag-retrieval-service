@@ -38,6 +38,32 @@ def test_recall_at_k_on_samples():
     assert recall_at_k(store, QUERIES, 3) == 1.0
 
 
+def test_store_list_delete_and_min_score():
+    store = InMemoryStore(HashingEmbedder())
+    store.add("cats", chunk_text("Cats are small domestic animals that sleep a lot."))
+    store.add("cats", chunk_text("Cats groom themselves and purr when content."))
+    store.add("stocks", chunk_text("Stocks and bonds are financial instruments traded on markets."))
+    docs = store.list_documents()
+    assert docs == [{"doc_id": "cats", "chunks": 2}, {"doc_id": "stocks", "chunks": 1}]
+    # A very high min_score filters out weak/irrelevant matches.
+    assert store.search("domestic animals that sleep", k=5, min_score=0.99) == []
+    assert store.search("domestic animals that sleep", k=5, min_score=0.0)
+    assert store.delete("cats") == 2
+    assert store.delete("cats") == 0
+    assert store.list_documents() == [{"doc_id": "stocks", "chunks": 1}]
+
+
+def test_api_documents_list_and_delete():
+    client = TestClient(app)
+    client.post("/ingest", json={"doc_id": "tmp-doc", "text": "Temporary document about vector databases and embeddings."})
+    docs = client.get("/documents").json()["documents"]
+    assert any(d["doc_id"] == "tmp-doc" for d in docs)
+    removed = client.delete("/documents/tmp-doc").json()
+    assert removed["chunks_removed"] >= 1
+    docs = client.get("/documents").json()["documents"]
+    assert not any(d["doc_id"] == "tmp-doc" for d in docs)
+
+
 def test_api_ingest_and_search():
     client = TestClient(app)
     assert client.get("/health").json()["status"] == "ok"
